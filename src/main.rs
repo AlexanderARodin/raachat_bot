@@ -1,26 +1,17 @@
 use std::env;
 use std::process;
 
-use telebot::Bot;
-use telebot::functions::*;
-use futures::stream::Stream;
+use tbot::prelude::*;
 
-fn main() {
-    let args: Vec<String> = env::args().collect();
-    if args.len() < 2 {
-        eprintln!("ERROR: there is no Token in command line");
-        process::exit(1);
-    }else{
-        println!("start under token: {}", args[1] );
-        start_bot( args[1].clone() );
-    }
-}
-
-fn start_bot( bot_token: String ) {
-    let mut bot = Bot::new( &bot_token );
+#[tokio::main]
+async fn main() {
+    println!("initializing..");
+    let mut bot = tbot::from_env!( "BOT_TOKEN" ).event_loop();
     
-    let handle = bot
-        .new_cmd("/putin");
+    bot.text( |context| async move {
+        println!("inside!!");
+    });
 
-    bot.run_with( handle );
+    println!("started..");
+    bot.polling().start().await.unwrap();
 }
