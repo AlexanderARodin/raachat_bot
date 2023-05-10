@@ -13,6 +13,7 @@ async fn main() {
     teloxide::repl(bot, |bot: Bot, msg: Message| async move {
         println!("inside!!!: {:?}", msg.text());
         bot.send_message(msg.chat.id, "putin xuiylo").await?;
+        bot.send_message(msg.chat.id, "Artem - molotoGGGG").await?;
         Ok(())
     })
     .await;
