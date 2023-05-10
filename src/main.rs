@@ -1,7 +1,9 @@
-
 use std::env;
 use std::process;
 
+use telebot::Bot;
+use telebot::functions::*;
+use futures::stream::Stream;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -15,6 +17,10 @@ fn main() {
 }
 
 fn start_bot( bot_token: String ) {
-    println!( "{}", bot_token );
+    let mut bot = Bot::new( &bot_token );
+    
+    let handle = bot
+        .new_cmd("/putin");
 
+    bot.run_with( handle );
 }
