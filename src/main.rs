@@ -1,17 +1,19 @@
-use std::env;
-use std::process;
 
-use tbot::prelude::*;
+use teloxide::prelude::*;
 
 #[tokio::main]
 async fn main() {
     println!("initializing..");
-    let mut bot = tbot::from_env!( "BOT_TOKEN" ).event_loop();
-    
-    bot.text( |context| async move {
-        println!("inside!!");
-    });
+    pretty_env_logger::init();
+    log::info!("start testraa bot ...");
 
+    let mut bot = Bot::from_env();
+    
     println!("started..");
-    bot.polling().start().await.unwrap();
+    teloxide::repl(bot, |bot: Bot, msg: Message| async move {
+        println!("inside!!!: {:?}", msg.text());
+        bot.send_message(msg.chat.id, "putin xuiylo").await?;
+        Ok(())
+    })
+    .await;
 }
