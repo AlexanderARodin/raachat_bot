@@ -12,7 +12,7 @@ async fn main() {
     pretty_env_logger::init();
     log::info!("start testraa bot ...");
 
-    let mut bot = Bot::from_env();
+    let bot = Bot::from_env();
     
     println!("started..");
     teloxide::repl(bot, |bot: Bot, msg: Message| async move {
