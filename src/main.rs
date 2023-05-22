@@ -1,8 +1,11 @@
 #![allow(non_snake_case)]
 
 use teloxide::prelude::*;
-use std::sync::{Arc,Mutex};
+use std::sync::Mutex;
 
+
+static SENDER_MUT: Mutex<Option<ChatId>> = Mutex::new(None);
+static RECEIVER_MUT: Mutex<Option<ChatId>> = Mutex::new(None);
 
 #[tokio::main]
 async fn main() {
@@ -11,22 +14,64 @@ async fn main() {
     log::info!("start testraa bot ...");
 
     let bot = Bot::from_env();
-    let inoutSrc = Arc::new( Mutex::new( InOut::new() ) );
-    let x = String::from("gtr");
     println!("started..");
 
-    let inoutClone = inoutSrc.clone();
     teloxide::repl(bot, |bot: Bot, msg: Message| async move {
         let msg_text = msg.text();
         let chat_id = msg.chat.id;
-        //let inout = inoutClone;
-        let mvdStrng = x;
         match msg_text {
             None => println!("{} -> <empty>", chat_id),
             Some(text) => {
                 println!("{} -> {}", chat_id, text);
                 match text {
+                    "/sender" => {
+                        println!("[set SENDER]: {}", chat_id);
+                        {
+                            let mut senderId = SENDER_MUT.lock().unwrap();
+                            *senderId = Some(chat_id);
+                        }
+                        bot.send_message(chat_id, "you are SENDER now")
+                            .await?;
+                    }
+                    "/receiver" => {
+                        println!("[set RECEIVER]: {}", chat_id);
+                        {
+                            let mut receiverId = RECEIVER_MUT.lock().unwrap();
+                            *receiverId = Some(chat_id);
+                        }
+                        bot.send_message(chat_id, "you are RECEIVER now")
+                            .await?;
+                    }
                     _ => {
+                        let senderId:Option<ChatId>;
+                        let receiverId:Option<ChatId>;
+                        {
+                            let senderId = SENDER_MUT.lock().unwrap();
+                            let receiverId = RECEIVER_MUT.lock().unwrap();
+                        }
+                        match (senderId, receiverId) {
+                            (None,None) => {
+                                bot.send_message(chat_id, "there are no sender/receiver (yet).")
+                                    .await?;
+                            }
+                            (None,_) => {
+                                bot.send_message(chat_id, "there is no receiver (yet).")
+                                    .await?;
+                            }
+                            (_,None) => {
+                                bot.send_message(chat_id, "there is no sender (yet).")
+                                    .await?;
+                            }
+                            (Some(sender), Some(receiver)) => {
+                                if sender == chat_id {
+                                    bot.send_message(receiver, text)
+                                        .await?;
+                                }else{
+                                    bot.send_message(chat_id, "you are not sender (yet).")
+                                        .await?;
+                                }
+                            }
+                        }
                         println!("_=>");
                     }
                 }
@@ -38,12 +83,3 @@ async fn main() {
     println!("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 }
 
-struct InOut {
-    senderId: Option<ChatId>,
-    receiverId: Option<ChatId>,
-}
-impl InOut {
-    fn new() -> InOut {
-        InOut{ senderId:None, receiverId:None }
-    }
-}
