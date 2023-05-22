@@ -30,7 +30,7 @@ async fn main() {
                             let mut senderId = SENDER_MUT.lock().unwrap();
                             *senderId = Some(chat_id);
                         }
-                        bot.send_message(chat_id, "you are SENDER now")
+                        bot.send_message(chat_id, "`**You are SENDER now**`")
                             .await?;
                     }
                     "/receiver" => {
@@ -39,21 +39,21 @@ async fn main() {
                             let mut receiverId = RECEIVER_MUT.lock().unwrap();
                             *receiverId = Some(chat_id);
                         }
-                        bot.send_message(chat_id, "you are RECEIVER now")
+                        bot.send_message(chat_id, "`**You are RECEIVER now**`")
                             .await?;
                     }
                     _ => {
                         match getSenderReceiver() {
                             (None,None) => {
-                                bot.send_message(chat_id, "there are no sender/receiver (yet).")
-                                    .await?;
-                            }
-                            (None,_) => {
-                                bot.send_message(chat_id, "there is no receiver (yet).")
+                                bot.send_message(chat_id, "`there are no sender/receiver (yet).`")
                                     .await?;
                             }
                             (_,None) => {
-                                bot.send_message(chat_id, "there is no sender (yet).")
+                                bot.send_message(chat_id, "`there is no receiver (yet).`")
+                                    .await?;
+                            }
+                            (None,_) => {
+                                bot.send_message(chat_id, "`there is no sender (yet).`")
                                     .await?;
                             }
                             (Some(sender), Some(receiver)) => {
@@ -61,12 +61,11 @@ async fn main() {
                                     bot.send_message(receiver, text)
                                         .await?;
                                 }else{
-                                    bot.send_message(chat_id, "you are not sender (yet).")
+                                    bot.send_message(chat_id, "`You are not sender (yet OR already).`")
                                         .await?;
                                 }
                             }
                         }
-                        println!("_=>");
                     }
                 }
             },
@@ -80,6 +79,5 @@ async fn main() {
 fn getSenderReceiver() -> (Option<ChatId>,Option<ChatId>) {
     let senderId:Option<ChatId> = *SENDER_MUT.lock().unwrap();
     let receiverId:Option<ChatId> = *RECEIVER_MUT.lock().unwrap();
-
     (senderId,receiverId)
 }
