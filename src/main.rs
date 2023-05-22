@@ -43,13 +43,7 @@ async fn main() {
                             .await?;
                     }
                     _ => {
-                        let senderId:Option<ChatId>;
-                        let receiverId:Option<ChatId>;
-                        {
-                            let senderId = SENDER_MUT.lock().unwrap();
-                            let receiverId = RECEIVER_MUT.lock().unwrap();
-                        }
-                        match (senderId, receiverId) {
+                        match getSenderReceiver() {
                             (None,None) => {
                                 bot.send_message(chat_id, "there are no sender/receiver (yet).")
                                     .await?;
@@ -83,3 +77,9 @@ async fn main() {
     println!("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 }
 
+fn getSenderReceiver() -> (Option<ChatId>,Option<ChatId>) {
+    let senderId:Option<ChatId> = *SENDER_MUT.lock().unwrap();
+    let receiverId:Option<ChatId> = *RECEIVER_MUT.lock().unwrap();
+
+    (senderId,receiverId)
+}
